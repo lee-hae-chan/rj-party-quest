@@ -8,34 +8,93 @@ if 'answers' not in st.session_state:
     # answers[층][파티원] = 정답 발판 번호 (0은 미선택)
     st.session_state.answers = [[0 for _ in range(4)] for _ in range(10)]
 
-# 제목
-st.title("로미오와 줄리엣 파티퀘스트 6단계 도우미")
-st.markdown("**파티원의 발판을 클릭하면 같은 층의 다른 파티원들의 해당 발판이 자동으로 잠깁니다.**")
-
-# 초기화 버튼
-col1, col2, col3 = st.columns([1, 1, 8])
-with col1:
-    if st.button("전체 초기화", use_container_width=True):
-        st.session_state.answers = [[0 for _ in range(4)] for _ in range(10)]
-        st.rerun()
-
-st.markdown("---")
-
 # CSS 스타일
 st.markdown("""
 <style>
-    .stButton button {
-        height: 60px;
-        font-size: 16px;
+    .platform-grid {
+        display: grid;
+        grid-template-columns: 80px repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .floor-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-weight: bold;
+        font-size: 16px;
+    }
+    .party-header {
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        padding: 10px;
+        background-color: #f0f2f6;
+        border-radius: 5px;
+    }
+    .platform-cell {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        align-items: center;
+    }
+    .platform-box {
+        width: 50px;
+        height: 50px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .platform-box:hover {
+        transform: scale(1.05);
+    }
+    .platform-available {
+        background-color: white;
+        border-color: #ccc;
+    }
+    .platform-selected {
+        background-color: #00cc00;
+        border-color: #00aa00;
+        color: white;
+    }
+    .platform-locked {
+        background-color: #ff6666;
+        border-color: #ff4444;
+        color: white;
+        cursor: not-allowed;
+        opacity: 0.7;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 10층 모두 표시
+# 제목
+st.title("로미오와 줄리엣 파티퀘스트 6단계 도우미")
+
+# 초기화 버튼
+if st.button("전체 초기화"):
+    st.session_state.answers = [[0 for _ in range(4)] for _ in range(10)]
+    st.rerun()
+
+st.markdown("---")
+
+# 헤더: 층 + 파티원 1~4
+header_cols = st.columns([1, 3, 3, 3, 3])
+with header_cols[0]:
+    st.markdown("### 층")
+for i in range(4):
+    with header_cols[i + 1]:
+        st.markdown(f"###  파티원 {i + 1}")
+
+st.markdown("---")
+
+# 각 층마다 행 생성
 for floor in range(10):
-    st.subheader(f"{floor + 1}층")
-    
     # 현재 층의 사용된 발판 확인
     used_platforms = {}  # {발판번호: 파티원번호}
     for party_idx in range(4):
@@ -43,89 +102,105 @@ for floor in range(10):
         if answer != 0:
             used_platforms[answer] = party_idx
     
-    # 파티원 헤더
-    header_cols = st.columns(4)
-    for i in range(4):
-        with header_cols[i]:
-            st.markdown(f"**파티원 {i + 1}**")
+    # 층 번호 + 각 파티원의 4개 발판
+    row_cols = st.columns([1, 3, 3, 3, 3])
     
-    # 각 발판 행 (1번~4번 발판)
-    for platform in range(1, 5):
-        platform_cols = st.columns(4)
-        
-        for party_idx in range(4):
-            with platform_cols[party_idx]:
-                my_answer = st.session_state.answers[floor][party_idx]
-                is_my_answer = (my_answer == platform)
-                is_locked = (platform in used_platforms and used_platforms[platform] != party_idx)
-                
-                # 버튼 텍스트와 타입
-                if is_my_answer:
-                    button_label = f"{platform}번"
-                    button_type = "primary"
-                elif is_locked:
-                    button_label = f"{platform}번"
-                    button_type = "secondary"
-                else:
-                    button_label = f"{platform}번"
-                    button_type = "secondary"
-                
-                # 버튼 클릭
-                if st.button(
-                    button_label,
-                    key=f"f{floor}_p{party_idx}_pl{platform}",
-                    disabled=is_locked,
-                    type=button_type,
-                    use_container_width=True
-                ):
+    # 층 번호
+    with row_cols[0]:
+        st.markdown(f"**{floor + 1}층**")
+    
+    # 각 파티원의 발판
+    for party_idx in range(4):
+        with row_cols[party_idx + 1]:
+            my_answer = st.session_state.answers[floor][party_idx]
+            
+            # 4개 발판을 가로로 배치
+            platform_cols = st.columns(4)
+            for platform in range(1, 5):
+                with platform_cols[platform - 1]:
+                    is_my_answer = (my_answer == platform)
+                    is_locked = (platform in used_platforms and used_platforms[platform] != party_idx)
+                    
+                    # 버튼 스타일 결정
                     if is_my_answer:
-                        # 선택 해제
-                        st.session_state.answers[floor][party_idx] = 0
+                        button_label = "✓"
+                        button_type = "primary"
+                        disabled = False
+                    elif is_locked:
+                        button_label = "✗"
+                        button_type = "secondary"
+                        disabled = True
                     else:
-                        # 선택
-                        st.session_state.answers[floor][party_idx] = platform
-                    st.rerun()
+                        button_label = str(platform)
+                        button_type = "secondary"
+                        disabled = False
+                    
+                    # 버튼 생성
+                    if st.button(
+                        button_label,
+                        key=f"f{floor}_p{party_idx}_pl{platform}",
+                        disabled=disabled,
+                        type=button_type,
+                        use_container_width=True
+                    ):
+                        if is_my_answer:
+                            # 선택 해제
+                            st.session_state.answers[floor][party_idx] = 0
+                        else:
+                            # 선택
+                            st.session_state.answers[floor][party_idx] = platform
+                        st.rerun()
     
-    st.markdown("---")
+    st.markdown("")  # 간격
 
 # 하단 요약
-st.header("진행 상황 요약")
-summary_text = ""
-for floor in range(10):
-    floor_summary = f"**{floor + 1}층**: "
-    answers_list = []
-    for party_idx in range(4):
-        answer = st.session_state.answers[floor][party_idx]
-        if answer == 0:
-            answers_list.append(f"파티원{party_idx + 1}(-)")
-        else:
-            answers_list.append(f"파티원{party_idx + 1}({answer}번)")
-    floor_summary += " | ".join(answers_list)
-    st.markdown(floor_summary)
+st.markdown("---")
+st.header(" 진행 상황")
+
+summary_cols = st.columns(2)
+with summary_cols[0]:
+    for floor in range(5):
+        answers_text = []
+        for party_idx in range(4):
+            answer = st.session_state.answers[floor][party_idx]
+            if answer == 0:
+                answers_text.append("-")
+            else:
+                answers_text.append(str(answer))
+        st.markdown(f"**{floor + 1}층**: " + " | ".join(answers_text))
+
+with summary_cols[1]:
+    for floor in range(5, 10):
+        answers_text = []
+        for party_idx in range(4):
+            answer = st.session_state.answers[floor][party_idx]
+            if answer == 0:
+                answers_text.append("-")
+            else:
+                answers_text.append(str(answer))
+        st.markdown(f"**{floor + 1}층**: " + " | ".join(answers_text))
 
 # 사용 방법
 with st.expander("사용 방법"):
     st.markdown("""
     ### 사용 방법
     
-    1. **발판 클릭하기**:
-       - 각 층마다 파티원 1~4의 발판(1번~4번)이 표시됩니다.
-       - 파티원이 통과한 발판을 클릭하세요.
-       - 예: 1층에서 파티원 1이 3번 발판으로 통과 → "파티원 1" 열의 "3번" 클릭
+    1. **발판 클릭**:
+       - 각 파티원 아래에 1~4번 발판이 있습니다.
+       - 통과한 발판 번호를 클릭하세요.
+       - 예: 1층에서 파티원 1이 3번 발판으로 통과 → 1층/파티원 1 열의 "3" 클릭
     
-    2. **자동 잠금**:
-       - 한 파티원이 발판을 선택하면 **같은 층의** 다른 파티원들은 그 발판을 선택할 수 없습니다.
-       - 파란색: 선택한 정답 발판
-       - 회색: 다른 파티원이 선택함 (클릭 불가)
-       - 흰색: 선택 가능한 발판
+    2. **표시 의미**:
+       - **숫자 (1~4)**: 선택 가능한 발판
+       - **✓ (파란색)**: 내가 선택한 정답 발판
+       - **✗ (회색)**: 다른 파티원이 선택함 (클릭 불가)
     
     3. **선택 해제**:
-       - 이미 선택한 발판을 다시 클릭하면 선택이 해제됩니다.
+       - ✓ 표시를 다시 클릭하면 선택이 해제됩니다.
     
-    4. **초기화**:
-       - 전체 초기화: 상단의 " 전체 초기화" 버튼
+    4. **자동 잠금**:
+       - 한 파티원이 발판을 선택하면 같은 층의 다른 파티원들은 그 발판을 선택할 수 없습니다.
     
     ### 핵심 규칙
-    - 각 층마다 4개의 발판이 있고, 4명의 파티원이 각각 다른 발판으로 통과해야 합니다.
-    - 한 층에서 같은 발판을 2명 이상 사용할 수 없습니다.
+    - 각 층마다 4명의 파티원이 각각 다른 발판(1~4번)으로 통과해야 합니다.
     """)
