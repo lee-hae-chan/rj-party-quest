@@ -11,73 +11,23 @@ if 'answers' not in st.session_state:
 # CSS 스타일
 st.markdown("""
 <style>
-    .platform-grid {
-        display: grid;
-        grid-template-columns: 80px repeat(4, 1fr);
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    .floor-label {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 16px;
-    }
-    .party-header {
-        text-align: center;
-        font-weight: bold;
+    .stButton button {
+        height: 55px;
         font-size: 18px;
-        padding: 10px;
-        background-color: #f0f2f6;
-        border-radius: 5px;
-    }
-    .platform-cell {
-        display: flex;
-        gap: 5px;
-        justify-content: center;
-        align-items: center;
-    }
-    .platform-box {
-        width: 50px;
-        height: 50px;
-        border: 2px solid #ccc;
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
         font-weight: bold;
-        font-size: 14px;
-        transition: all 0.2s;
+        margin: 3px;
     }
-    .platform-box:hover {
-        transform: scale(1.05);
-    }
-    .platform-available {
-        background-color: white;
-        border-color: #ccc;
-    }
-    .platform-selected {
-        background-color: #00cc00;
-        border-color: #00aa00;
-        color: white;
-    }
-    .platform-locked {
-        background-color: #ff6666;
-        border-color: #ff4444;
-        color: white;
-        cursor: not-allowed;
-        opacity: 0.7;
+    div[data-testid="column"] {
+        padding: 5px;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # 제목
-st.title("로미오와 줄리엣 파티퀘스트 6단계 도우미")
+st.title("🎭 로미오와 줄리엣 파티퀘스트 6단계 도우미")
 
 # 초기화 버튼
-if st.button("전체 초기화"):
+if st.button("🔄 전체 초기화"):
     st.session_state.answers = [[0 for _ in range(4)] for _ in range(10)]
     st.rerun()
 
@@ -89,7 +39,7 @@ with header_cols[0]:
     st.markdown("### 층")
 for i in range(4):
     with header_cols[i + 1]:
-        st.markdown(f"###  파티원 {i + 1}")
+        st.markdown(f"### 👤 파티원 {i + 1}")
 
 st.markdown("---")
 
@@ -107,7 +57,7 @@ for floor in range(10):
     
     # 층 번호
     with row_cols[0]:
-        st.markdown(f"**{floor + 1}층**")
+        st.markdown(f"<h3 style='text-align: center; padding-top: 15px;'>{floor + 1}층</h3>", unsafe_allow_html=True)
     
     # 각 파티원의 발판
     for party_idx in range(4):
@@ -151,11 +101,11 @@ for floor in range(10):
                             st.session_state.answers[floor][party_idx] = platform
                         st.rerun()
     
-    st.markdown("")  # 간격
+    st.markdown("<br>", unsafe_allow_html=True)  # 층 사이 간격
 
 # 하단 요약
 st.markdown("---")
-st.header(" 진행 상황")
+st.header("진행 상황")
 
 summary_cols = st.columns(2)
 with summary_cols[0]:
