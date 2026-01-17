@@ -51,7 +51,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 제목
-st.title("🎭 로미오와 줄리엣 PQ 6단계")
+st.title("로미오와 줄리엣 파티퀘스트 6단계")
 
 # 초기화 버튼
 if st.button("🔄 초기화", use_container_width=False):
