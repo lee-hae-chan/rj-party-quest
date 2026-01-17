@@ -12,13 +12,17 @@ if 'answers' not in st.session_state:
 st.markdown("""
 <style>
     .stButton button {
-        height: 55px;
-        font-size: 18px;
+        height: 60px;
+        font-size: 20px;
         font-weight: bold;
-        margin: 3px;
+        margin: 5px;
     }
     div[data-testid="column"] {
-        padding: 5px;
+        padding: 10px;
+    }
+    .block-container {
+        padding-left: 2rem;
+        padding-right: 2rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -101,11 +105,11 @@ for floor in range(10):
                             st.session_state.answers[floor][party_idx] = platform
                         st.rerun()
     
-    st.markdown("<br>", unsafe_allow_html=True)  # 층 사이 간격
+    st.markdown("<br><br>", unsafe_allow_html=True)  # 층 사이 간격 더 넓게
 
 # 하단 요약
 st.markdown("---")
-st.header("진행 상황")
+st.header("📊 진행 상황")
 
 summary_cols = st.columns(2)
 with summary_cols[0]:
@@ -131,7 +135,7 @@ with summary_cols[1]:
         st.markdown(f"**{floor + 1}층**: " + " | ".join(answers_text))
 
 # 사용 방법
-with st.expander("사용 방법"):
+with st.expander("ℹ️ 사용 방법"):
     st.markdown("""
     ### 사용 방법
     
