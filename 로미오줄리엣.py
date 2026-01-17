@@ -45,7 +45,7 @@ st.markdown("""
     div[data-testid="column"]:nth-child(3),
     div[data-testid="column"]:nth-child(4),
     div[data-testid="column"]:nth-child(5) {
-        margin-left: 15px;
+        margin-left: 25px;
     }
 </style>
 """, unsafe_allow_html=True)
