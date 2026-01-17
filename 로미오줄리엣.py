@@ -16,12 +16,12 @@ st.markdown("""
         width: 35px;
         font-size: 0px;
         font-weight: bold;
-        margin: 2px;
+        margin: 1px;
         padding: 0;
         min-width: 35px;
     }
     div[data-testid="column"] {
-        padding: 3px;
+        padding: 1px;
     }
     .block-container {
         padding: 1rem;
@@ -39,6 +39,13 @@ st.markdown("""
     h3 {
         font-size: 1rem;
         margin: 0.3rem 0;
+    }
+    /* 파티원 그룹 간격 */
+    div[data-testid="column"]:nth-child(2),
+    div[data-testid="column"]:nth-child(3),
+    div[data-testid="column"]:nth-child(4),
+    div[data-testid="column"]:nth-child(5) {
+        margin-left: 15px;
     }
 </style>
 """, unsafe_allow_html=True)
