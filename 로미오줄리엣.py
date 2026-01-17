@@ -45,7 +45,7 @@ st.markdown("""
     div[data-testid="column"]:nth-child(3),
     div[data-testid="column"]:nth-child(4),
     div[data-testid="column"]:nth-child(5) {
-        margin-left: 25px;
+        margin-left: 15px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -61,12 +61,17 @@ if st.button("🔄 초기화", use_container_width=False):
 st.markdown("---")
 
 # 헤더: 층 + 파티원 1~4
-header_cols = st.columns([0.5, 1, 1, 1, 1])
+header_cols = st.columns([0.5, 0.1, 1, 0.1, 1, 0.1, 1, 0.1, 1])
 with header_cols[0]:
     st.markdown("**층**")
-for i in range(4):
-    with header_cols[i + 1]:
-        st.markdown(f"**P{i + 1}**")
+with header_cols[2]:
+    st.markdown("**P1**")
+with header_cols[4]:
+    st.markdown("**P2**")
+with header_cols[6]:
+    st.markdown("**P3**")
+with header_cols[8]:
+    st.markdown("**P4**")
 
 st.markdown("---")
 
