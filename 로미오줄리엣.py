@@ -1,161 +1,122 @@
 import streamlit as st
 
 # 페이지 설정
-st.set_page_config(page_title="로미오와 줄리엣 파티퀘스트 6단계", layout="wide")
+st.set_page_config(page_title="로미오와 줄리엣 6단계 도우미", layout="wide")
 
 # 세션 상태 초기화
 if 'answers' not in st.session_state:
-    # answers[층][파티원] = 정답 발판 번호 (0은 미선택)
+    # answers[층][파티원] = 정답 발판 번호 (0~9층, 0은 미선택)
     st.session_state.answers = [[0 for _ in range(4)] for _ in range(10)]
 
-# CSS 스타일
+# --- CSS 스타일 (이미지 느낌 구현) ---
 st.markdown("""
 <style>
+    /* 전체 배경 및 폰트 */
+    .stApp {
+        background-color: #0e1117;
+        color: white;
+    }
+    
+    /* 버튼 기본 스타일 */
     .stButton button {
-        height: 35px;
-        width: 35px;
-        font-size: 0px;
+        height: 45px;
+        width: 100%;
+        border-radius: 8px;
         font-weight: bold;
-        margin: 1px;
-        padding: 0;
-        min-width: 35px;
+        transition: 0.3s;
+        border: 1px solid #333;
     }
-    div[data-testid="column"] {
-        padding: 1px;
+
+    /* 선택되지 않은 빈 발판 (검정/어두운 회색) */
+    div[data-testid="stBaseButton-secondary"] button {
+        background-color: #1a1c23;
+        color: #444;
     }
-    .block-container {
-        padding: 1rem;
-        max-width: 100%;
+
+    /* 다른 사람이 선택한 발판 (빨간색 텍스트 또는 테두리 - 이미지의 2번 발판 느낌) */
+    /* Streamlit 기본 버튼으로는 한계가 있어 로직으로 처리 */
+
+    /* 층 구분선 및 레이아웃 */
+    .floor-container {
+        border: 1px solid #333;
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #000000;
+        text-align: center;
     }
-    h1 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-    }
-    h2 {
+    
+    .party-name {
+        text-align: center;
+        padding: 10px;
         font-size: 1.2rem;
-        margin-top: 0.5rem;
-        margin-bottom: 0.3rem;
-    }
-    h3 {
-        font-size: 1rem;
-        margin: 0.3rem 0;
-    }
-    /* 파티원 그룹 간격 */
-    div[data-testid="column"]:nth-child(2),
-    div[data-testid="column"]:nth-child(3),
-    div[data-testid="column"]:nth-child(4),
-    div[data-testid="column"]:nth-child(5) {
-        margin-left: 15px;
+        font-weight: bold;
+        background-color: #111;
+        margin-bottom: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 제목
-st.title("로미오와 줄리엣 파티퀘스트 6단계")
+st.title("🏰 로미오와 줄리엣 6단계 도우미")
 
-# 초기화 버튼
-if st.button("🔄 초기화", use_container_width=False):
-    st.session_state.answers = [[0 for _ in range(4)] for _ in range(10)]
-    st.rerun()
+# 상단 컨트롤러
+col_ctrl1, col_ctrl2 = st.columns([1, 5])
+with col_ctrl1:
+    if st.button("🔄 전체 초기화"):
+        st.session_state.answers = [[0 for _ in range(4)] for _ in range(10)]
+        st.rerun()
 
-st.markdown("---")
+# --- 메인 보드 구성 ---
+# 이미지처럼 파티원별로 4개의 큰 구역(Column)을 나눕니다.
+party_names = ["바로시", "FLOW3R", "표도탄", "호ㅏ살모"] # 이미지 예시 이름
+cols = st.columns(4)
 
-# 헤더: 층 + 파티원 1~4
-header_cols = st.columns([0.5, 0.1, 1, 0.1, 1, 0.1, 1, 0.1, 1])
-with header_cols[0]:
-    st.markdown("**층**")
-with header_cols[2]:
-    st.markdown("**P1**")
-with header_cols[4]:
-    st.markdown("**P2**")
-with header_cols[6]:
-    st.markdown("**P3**")
-with header_cols[8]:
-    st.markdown("**P4**")
-
-st.markdown("---")
-
-# 각 층마다 행 생성
-for floor in range(10):
-    # 현재 층의 사용된 발판 확인
-    used_platforms = {}  # {발판번호: 파티원번호}
-    for party_idx in range(4):
-        answer = st.session_state.answers[floor][party_idx]
-        if answer != 0:
-            used_platforms[answer] = party_idx
-    
-    # 층 번호 + 각 파티원의 4개 발판
-    row_cols = st.columns([0.5, 1, 1, 1, 1])
-    
-    # 층 번호
-    with row_cols[0]:
-        st.markdown(f"<div style='text-align: center; padding-top: 8px; font-weight: bold;'>{floor + 1}</div>", unsafe_allow_html=True)
-    
-    # 각 파티원의 발판
-    for party_idx in range(4):
-        with row_cols[party_idx + 1]:
-            my_answer = st.session_state.answers[floor][party_idx]
+for p_idx in range(4):
+    with cols[p_idx]:
+        # 파티원 이름 헤더
+        st.markdown(f"<div class='party-name'>{party_names[p_idx]}</div>", unsafe_allow_html=True)
+        
+        # 층을 이미지처럼 10층(위) -> 1층(아래) 순서로 렌더링
+        for floor in range(9, -1, -1):
+            f_col1, f_col2 = st.columns([0.3, 1])
             
-            # 4개 발판을 가로로 배치
-            platform_cols = st.columns(4)
-            for platform in range(1, 5):
-                with platform_cols[platform - 1]:
-                    is_my_answer = (my_answer == platform)
-                    is_locked = (platform in used_platforms and used_platforms[platform] != party_idx)
-                    
-                    # 버튼 스타일 결정
-                    if is_my_answer:
-                        button_label = ""
-                        button_type = "primary"
-                        disabled = False
-                    elif is_locked:
-                        button_label = ""
-                        button_type = "secondary"
-                        disabled = True
-                    else:
-                        button_label = ""
-                        button_type = "secondary"
-                        disabled = False
-                    
-                    # 버튼 생성
-                    if st.button(
-                        button_label,
-                        key=f"f{floor}_p{party_idx}_pl{platform}",
-                        disabled=disabled,
-                        type=button_type,
-                        use_container_width=True
-                    ):
-                        if is_my_answer:
-                            # 선택 해제
-                            st.session_state.answers[floor][party_idx] = 0
+            with f_col1:
+                st.markdown(f"<div style='margin-top:10px;'>{floor + 1}층</div>", unsafe_allow_html=True)
+            
+            with f_col2:
+                # 4개의 발판을 한 줄에 배치
+                p_cols = st.columns(4)
+                for plate in range(1, 5):
+                    with p_cols[plate-1]:
+                        key = f"f{floor}_p{p_idx}_pl{plate}"
+                        
+                        # 상태 확인
+                        is_mine = (st.session_state.answers[floor][p_idx] == plate)
+                        
+                        # 다른 파티원이 해당 층의 이 발판을 선택했는지 확인
+                        others_selected = False
+                        for other_p in range(4):
+                            if other_p != p_idx and st.session_state.answers[floor][other_p] == plate:
+                                others_selected = True
+                                break
+                        
+                        # 버튼 스타일 결정
+                        if is_mine:
+                            # 내가 선택한 정답 (파란색)
+                            b_type = "primary"
+                            label = f"{plate}"
+                        elif others_selected:
+                            # 남이 선택한 것 (이미지의 빨간색 숫자 느낌)
+                            # Streamlit은 버튼별 개별 색상 지정이 까다로워 일반 버튼으로 표시하되 로직만 분리
+                            b_type = "secondary"
+                            label = f"{plate}" # 이미지는 빨간색 숫자로 표시됨
                         else:
-                            # 선택
-                            st.session_state.answers[floor][party_idx] = platform
-                        st.rerun()
-    
-    st.markdown("")  # 층 사이 간격
+                            # 아무도 안 고름 (빈 칸)
+                            b_type = "secondary"
+                            label = " "
 
-# 하단 요약 (간단하게)
-st.markdown("---")
-st.markdown("**📊 진행 상황**")
-
-for floor in range(10):
-    answers_text = []
-    for party_idx in range(4):
-        answer = st.session_state.answers[floor][party_idx]
-        if answer == 0:
-            answers_text.append("-")
-        else:
-            answers_text.append(str(answer))
-    st.text(f"{floor + 1}층: {' | '.join(answers_text)}")
-
-# 사용 방법
-with st.expander("ℹ️ 사용법"):
-    st.markdown("""
-    **클릭하여 발판 선택**
-    - 파란색: 선택한 정답
-    - 회색: 사용 불가 (다른 파티원이 선택)
-    - 흰색: 선택 가능
-    
-    **규칙**: 각 층마다 4명이 서로 다른 발판 사용
-    """)
+                        if st.button(label, key=key, type=b_type, use_container_width=True):
+                            if is_mine:
+                                st.session_state.answers[floor][p_idx] = 0
+                            else:
+                                st.session_state.answers[floor][p_idx] = plate
+                            st.rerun()
